@@ -1,7 +1,12 @@
 import json
 import re
-import requests
+import time
+
 from bs4 import BeautifulSoup
+from curl_cffi import requests
+
+
+BASE_URL = "https://supremevalues.com/mm2"
 
 CATEGORIES = [
     "pets",
@@ -15,80 +20,93 @@ CATEGORIES = [
     "uniques",
 ]
 
-BASE_URL = "https://supremevalues.com/mm2/"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140 Safari/537.36"
-}
+def parse_value(card):
+    """
+    Получает значение предмета.
 
+    Сначала пробуем data-value.
+    Если его нет, пытаемся найти видимое Value - ...
+    """
 
-def clean_value(value):
-    value = value.strip()
+    # Основной вариант: data-value
+    raw = card.get("data-value")
+
+    if raw is not None:
+        raw = str(raw).strip()
+
+        if raw.upper() == "N/A":
+            return None
+
+        # Числовое значение
+        if re.fullmatch(r"\d+(?:\.\d+)?", raw):
+            number = float(raw)
+
+            if number.is_integer():
+                return int(number)
+
+            return number
+
+    # Запасной вариант — ищем Value в тексте карточки
+    text = card.get_text(" ", strip=True)
+
+    match = re.search(
+        r"Value\s*-\s*([\d,]+|x\d+\s+T1\s+\w+)",
+        text,
+        re.IGNORECASE
+    )
+
+    if not match:
+        return None
+
+    value = match.group(1).strip()
 
     if value.upper() == "N/A":
         return None
 
-    # Обычные числа: 750, 5500, 125
     if re.fullmatch(r"[\d,]+", value):
         return int(value.replace(",", ""))
 
-    # Значения вроде x3 T1 Legendaries
     return value
 
 
-def extract_items(html):
-    soup = BeautifulSoup(html, "html.parser")
+def scrape_category(category):
+    url = f"{BASE_URL}/{category}"
 
-    # Берём текстовые куски страницы отдельно,
-    # а не склеиваем всю страницу в одну строку.
-    texts = [x.strip() for x in soup.stripped_strings if x.strip()]
+    print(f"Scraping {category}: {url}")
+
+    response = requests.get(
+        url,
+        impersonate="chrome120",
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
 
     items = {}
 
-    for i, text in enumerate(texts):
+    cards = soup.select(".itemcolumn")
 
-        if not text.startswith("Value -"):
+    print(f"  Cards found: {len(cards)}")
+
+    for card in cards:
+
+        name_element = card.select_one(".itemhead")
+
+        if not name_element:
             continue
 
-        value_raw = text[len("Value -"):].strip()
-        value = clean_value(value_raw)
+        name = name_element.get_text(" ", strip=True)
 
-        # N/A = непродаваемый предмет
+        if not name:
+            continue
+
+        value = parse_value(card)
+
+        # Пропускаем предметы без значения
         if value is None:
-            continue
-
-        name = None
-
-        # Ищем название непосредственно перед Value -
-        for previous in reversed(texts[max(0, i - 8):i]):
-
-            # Формат:
-            # Image: Zombie Dog | Zombie Dog Class - Common
-            match = re.search(
-                r"(?:Image:\s*)?.*?\|\s*(.*?)\s+Class\s*-\s*",
-                previous
-            )
-
-            if match:
-                name = match.group(1).strip()
-                break
-
-            # Запасной вариант:
-            # Image: Name
-            if previous.startswith("Image:"):
-                candidate = previous[len("Image:"):].strip()
-
-                if candidate and not candidate.startswith("This item is currently"):
-                    name = candidate
-                    break
-
-        if not name:
-            continue
-
-        # Иногда перед названием остаётся Image:
-        name = re.sub(r"^Image:\s*", "", name).strip()
-
-        if not name:
             continue
 
         items[name] = {
@@ -96,64 +114,68 @@ def extract_items(html):
             "value": value
         }
 
-    return list(items.values())
+    result = list(items.values())
 
+    print(f"  Items with values: {len(result)}")
 
-def scrape_category(category):
-    url = BASE_URL + category
-
-    print(f"Scraping {category}: {url}")
-
-    response = requests.get(
-        url,
-        headers=HEADERS,
-        timeout=30
-    )
-
-    response.raise_for_status()
-
-    items = extract_items(response.text)
-
-    print(f"  Found: {len(items)} items")
-
-    # КРИТИЧЕСКАЯ ЗАЩИТА:
-    # если сайт изменился или парсер сломался,
-    # НЕ разрешаем записать пустые данные.
-    if len(items) == 0:
+    # Защита от поломки парсера
+    if len(result) == 0:
         raise RuntimeError(
             f"No items found in category '{category}'. "
-            "Scraper stopped to prevent empty values.json."
+            "values.json will NOT be changed."
         )
 
-    return items
+    return result
 
 
 def main():
+
     result = {}
 
     for category in CATEGORIES:
+
         result[category] = scrape_category(category)
 
-    # Дополнительная защита
-    total = sum(len(items) for items in result.values())
+        # Небольшая пауза между запросами
+        time.sleep(2)
+
+    total = sum(
+        len(items)
+        for items in result.values()
+    )
 
     if total == 0:
-        raise RuntimeError("TOTAL ITEMS = 0. Nothing will be written.")
+        raise RuntimeError(
+            "No items were scraped. "
+            "values.json will NOT be changed."
+        )
 
-    with open("values.json", "w", encoding="utf-8") as f:
+    # Записываем JSON только после успешного
+    # получения всех категорий
+    with open(
+        "values.json",
+        "w",
+        encoding="utf-8"
+    ) as file:
+
         json.dump(
             result,
-            f,
+            file,
             ensure_ascii=False,
             indent=2
         )
 
     print()
+    print("================================")
     print("SUCCESS!")
     print(f"Total items: {total}")
+    print("================================")
 
     for category in CATEGORIES:
-        print(f"{category}: {len(result[category])}")
+        print(
+            f"{category}: "
+            f"{len(result[category])}"
+        )
 
 
 if __name__ == "__main__":
