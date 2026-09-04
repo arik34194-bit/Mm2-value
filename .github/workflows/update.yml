@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4
+        run: pip install curl_cffi beautifulsoup4
 
       - name: Scrape values
         run: python scraper.py
