@@ -2,8 +2,8 @@ name: Update MM2 Values
 
 on:
   schedule:
-    - cron: "*/5 * * * *"          # каждые 5 минут
-  workflow_dispatch:               # можно запускать вручную
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,30 +31,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
+
           git add values.json README.md
-          
+
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Update MM2 values $(date -u +%Y-%m-%d_%H:%M)"
-            git push
-          fi
-          if git diff --cached --quiet; then
-            echo "No changes"
-          else
-            git commit -m "Update MM2 values"
-            git pull --rebase origin main
-            git push origin main
-          fi
-          if git diff --cached --quiet; then
-            echo "No changes"
-          else
-            git commit -m "Update MM2 values"
-            git push
-          fi          if git diff --cached --quiet; then
-            echo "No changes"
-          else
-            git commit -m "Update MM2 values"
+            git commit -m "Update MM2 values $(date -u +'%Y-%m-%d %H:%M')"
             git push
           fi
