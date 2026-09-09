@@ -1726,27 +1726,23 @@
     },
     {
       "name": "Constellation",
-      "value": 3150
+      "value": 3200
     },
     {
       "name": "Evergreen",
-      "value": 2950
-    },
-    {
-      "name": "Alienbeam",
-      "value": 2150
+      "value": 2900
     },
     {
       "name": "Vampire's Gun",
-      "value": 2150
-    },
-    {
-      "name": "Turkey",
       "value": 2100
     },
     {
-      "name": "Raygun",
-      "value": 1800
+      "name": "Alienbeam",
+      "value": 2050
+    },
+    {
+      "name": "Turkey",
+      "value": 2000
     },
     {
       "name": "Darkshot",
@@ -1755,6 +1751,10 @@
     {
       "name": "Darksword",
       "value": 1775
+    },
+    {
+      "name": "Raygun",
+      "value": 1750
     },
     {
       "name": "Blossom",
@@ -1766,11 +1766,11 @@
     },
     {
       "name": "Sunrise",
-      "value": 1200
+      "value": 1100
     },
     {
       "name": "Sunset",
-      "value": 700
+      "value": 675
     },
     {
       "name": "Bauble",
@@ -1782,11 +1782,11 @@
     },
     {
       "name": "Soul",
-      "value": 650
+      "value": 655
     },
     {
       "name": "Spirit",
-      "value": 640
+      "value": 645
     },
     {
       "name": "Rainbow Gun",
@@ -1829,16 +1829,16 @@
       "value": 285
     },
     {
-      "name": "Waves",
+      "name": "Blizzard",
       "value": 280
     },
     {
-      "name": "Blizzard",
-      "value": 270
+      "name": "Snowstorm",
+      "value": 280
     },
     {
-      "name": "Snowstorm",
-      "value": 270
+      "name": "Waves",
+      "value": 280
     },
     {
       "name": "Flowerwood Gun",
@@ -1858,7 +1858,7 @@
     },
     {
       "name": "Icecream",
-      "value": 165
+      "value": 155
     },
     {
       "name": "Treat",
@@ -1881,15 +1881,15 @@
       "value": 120
     },
     {
-      "name": "Ornament",
-      "value": 110
-    },
-    {
       "name": "Beachy",
       "value": 105
     },
     {
       "name": "Sands",
+      "value": 105
+    },
+    {
+      "name": "Ornament",
       "value": 105
     },
     {
@@ -2228,15 +2228,15 @@
   "chromas": [
     {
       "name": "C. Traveler's Gun",
-      "value": 190000
+      "value": 185000
     },
     {
       "name": "Chroma Evergun",
-      "value": 70000
+      "value": 68000
     },
     {
       "name": "Chroma Evergreen",
-      "value": 48000
+      "value": 47000
     },
     {
       "name": "Chroma Bauble",
@@ -2260,7 +2260,7 @@
     },
     {
       "name": "Chroma Sunrise",
-      "value": 11500
+      "value": 11250
     },
     {
       "name": "Chroma Snowcannon",
@@ -2268,11 +2268,11 @@
     },
     {
       "name": "Chroma Sunset",
-      "value": 7500
+      "value": 7250
     },
     {
       "name": "Chroma Blizzard",
-      "value": 4300
+      "value": 4400
     },
     {
       "name": "Chroma Snowstorm",
@@ -2284,7 +2284,7 @@
     },
     {
       "name": "Chroma Watergun",
-      "value": 2800
+      "value": 2700
     },
     {
       "name": "Chroma Snow Dagger",
@@ -2292,7 +2292,7 @@
     },
     {
       "name": "Chroma Icecream",
-      "value": 2200
+      "value": 2250
     },
     {
       "name": "Chroma Ornament",
@@ -2464,7 +2464,7 @@
   "ancients": [
     {
       "name": "Gingerscope",
-      "value": 16750
+      "value": 16500
     },
     {
       "name": "Traveler's Axe",
@@ -2472,7 +2472,7 @@
     },
     {
       "name": "Celestial",
-      "value": 2500
+      "value": 2550
     },
     {
       "name": "Vampire's Axe",
