@@ -18,12 +18,13 @@ if not LocalPlayer then
 	LocalPlayer = Players.LocalPlayer
 end
 
-local RAW_JSON_URL = "https://raw.githubusercontent.com/Namedadude/Supreme-Values-MM2-Scraper/refs/heads/main/scraper/values.json?nocache=" .. tostring(math.random(1, 1000000))
+local RAW_JSON_URL = "https://raw.githubusercontent.com/Namedadude/Supreme-Values-MM2-Scraper/refs/heads/main/scraper/values.json"
 
 local DatabaseExact = {}
 local DatabaseByName = {}
 local DatabaseSingle = {}
 local valueSource = "none"
+local loadedCount = 0
 
 local Sync = nil
 local syncAssetIndex = {}
@@ -43,7 +44,7 @@ local function cleanString(s)
 	s = s:gsub("[\194\160\160\226\128\139\239\187\191]", " ")
 	s = s:gsub("^%s+", ""):gsub("%s+$", "")
 	s = s:gsub("[\226\128\153\226\128\152`]", "'")
-	s = s:gsub("вЂ™", "'"):gsub("`", "'")
+	s = s:gsub("’", "'"):gsub("`", "'")
 	s = s:gsub("%s*%b()", ""):gsub("%s*%b[]", "")
 	s = s:gsub("%s*x%s*%d+$", "")
 	s = s:gsub("^%s*%d+%s*x%s+", "")
@@ -51,7 +52,6 @@ local function cleanString(s)
 	s = s:gsub("^%s+", ""):gsub("%s+$", "")
 	s = s:gsub("(%a)%s+(%d+)", "%1%2")
 	s = s:gsub("%-", "")
-
 	return s
 end
 
@@ -121,21 +121,14 @@ local function httpGet(url)
 	return nil
 end
 
-local function loadLiveValues()
-	local body = httpGet(RAW_JSON_URL)
-	if not body then
-		valueSource = "failed"
-		return false
-	end
+local function parseAndFillDatabase(body)
 	local ok, data = pcall(function() return HttpService:JSONDecode(body) end)
 	if not ok or type(data) ~= "table" then
-		valueSource = "failed"
-		return false
+		return 0
 	end
 	local items = data.items or data
 	if type(items) ~= "table" then
-		valueSource = "failed"
-		return false
+		return 0
 	end
 
 	DatabaseExact = {}
@@ -169,7 +162,7 @@ local function loadLiveValues()
 				isChroma = (info.isChroma == true) or (tostring(info.rarity):lower() == "chroma") or tostring(key):lower():find("^chroma") ~= nil
 			}
 
-			local keyLower = tostring(key):lower():gsub("вЂ™", "'")
+			local keyLower = tostring(key):lower():gsub("’", "'")
 			DatabaseExact[keyLower] = entry
 
 			local base = cleanString(entry.name)
@@ -216,16 +209,38 @@ local function loadLiveValues()
 		end
 	end
 
-	if count < 1 then
-		valueSource = "failed"
-		return false
-	end
-
-	valueSource = "live (" .. tostring(count) .. ")"
-	return true
+	return count
 end
 
-local loaded = loadLiveValues()
+local function loadLiveValues(maxAttempts)
+	maxAttempts = maxAttempts or 3
+	for attempt = 1, maxAttempts do
+		local url = RAW_JSON_URL .. "?nocache=" .. tostring(math.random(1, 1000000))
+		local body = httpGet(url)
+		if body then
+			local count = parseAndFillDatabase(body)
+			if count >= 1 then
+				loadedCount = count
+				valueSource = "live (" .. tostring(count) .. ")"
+				return true
+			else
+				warn("[TradeValues] GitHub ответил, но не удалось распарсить JSON (attempt " .. attempt .. "/" .. maxAttempts .. ")")
+			end
+		else
+			warn("[TradeValues] Не удалось получить JSON с GitHub (attempt " .. attempt .. "/" .. maxAttempts .. ")")
+		end
+
+		if attempt < maxAttempts then
+			task.wait(1.5)
+		end
+	end
+
+	valueSource = "failed"
+	loadedCount = 0
+	return false
+end
+
+loadLiveValues(3)
 print("[TradeValues] values: " .. tostring(valueSource))
 
 local function indexSyncItem(itemData, itemKey, bagName)
@@ -515,8 +530,8 @@ local function getItemDetails(slot, displayName)
 			for _, c in pairs(p:GetChildren()) do
 				if c:IsA("GuiObject") and c.Visible then
 					local cName = c.Name:lower()
-					if cName:find("chroma") or cName:find("С…СЂРѕРјР°") then return true end
-					if c:IsA("TextLabel") and (c.Text:lower():find("chroma") or c.Text:lower():find("С…СЂРѕРјР°")) then return true end
+					if cName:find("chroma") or cName:find("хрома") then return true end
+					if c:IsA("TextLabel") and (c.Text:lower():find("chroma") or c.Text:lower():find("хрома")) then return true end
 				end
 			end
 			return false
@@ -528,7 +543,7 @@ local function getItemDetails(slot, displayName)
 	end
 
 	local dispLower = displayName and tostring(displayName):lower() or ""
-	if dispLower:find("chroma") or dispLower:find("С…СЂРѕРјР°") then
+	if dispLower:find("chroma") or dispLower:find("хрома") then
 		isChroma = true
 	end
 
@@ -563,7 +578,7 @@ end
 local function smartMatchDatabase(englishName, itemType, rarity, year, isChroma)
 	if not englishName or englishName == "" then return nil end
 
-	local cleanName = tostring(englishName):lower():gsub("вЂ™", "'"):gsub("^%s+", ""):gsub("%s+$", "")
+	local cleanName = tostring(englishName):lower():gsub("’", "'"):gsub("^%s+", ""):gsub("%s+$", "")
 
 	if DatabaseExact[cleanName] then
 		local match = DatabaseExact[cleanName]
@@ -818,17 +833,11 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 	local disp, val, stability, tier = lookupDisplayAndNumericValue(itemName, slot)
 	if not disp then
 		local label = parent:FindFirstChild("ValueLabel")
-		if label then
-			pcall(function() label:Destroy() end)
-		end
+		if label then pcall(function() label:Destroy() end) end
 		local stabLabel = parent:FindFirstChild("StabilityLabel")
-		if stabLabel then
-			pcall(function() stabLabel:Destroy() end)
-		end
+		if stabLabel then pcall(function() stabLabel:Destroy() end) end
 		local tierLabel = parent:FindFirstChild("TierLabel")
-		if tierLabel then
-			pcall(function() tierLabel:Destroy() end)
-		end
+		if tierLabel then pcall(function() tierLabel:Destroy() end) end
 		return
 	end
 
@@ -849,15 +858,11 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 
 	local label = parent:FindFirstChild("ValueLabel")
 	if label and label:IsA("TextLabel") then
-		if label.Text ~= displayText then
-			label.Text = displayText
-		end
+		if label.Text ~= displayText then label.Text = displayText end
 		label.Position = UDim2.new(0, 4, 0, 4)
 		label.ZIndex = 150
 	else
-		if label then
-			pcall(function() label:Destroy() end)
-		end
+		if label then pcall(function() label:Destroy() end) end
 		label = Instance.new("TextLabel")
 		label.Name = "ValueLabel"
 		label.Size = UDim2.new(0.65, 0, 0, 14)
@@ -879,9 +884,7 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 		for _, l in ipairs(createdLabels) do
 			if l == label then found = true break end
 		end
-		if not found then
-			table.insert(createdLabels, label)
-		end
+		if not found then table.insert(createdLabels, label) end
 	end
 
 	local stabLabel = parent:FindFirstChild("StabilityLabel")
@@ -889,16 +892,12 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 		local stabColor = Color3.fromRGB(255, 255, 255)
 
 		if stabLabel and stabLabel:IsA("TextLabel") then
-			if stabLabel.Text ~= stability then
-				stabLabel.Text = stability
-			end
+			if stabLabel.Text ~= stability then stabLabel.Text = stability end
 			stabLabel.TextColor3 = stabColor
 			stabLabel.Position = UDim2.new(0, 4, 0, 18)
 			stabLabel.ZIndex = 150
 		else
-			if stabLabel then
-				pcall(function() stabLabel:Destroy() end)
-			end
+			if stabLabel then pcall(function() stabLabel:Destroy() end) end
 			stabLabel = Instance.new("TextLabel")
 			stabLabel.Name = "StabilityLabel"
 			stabLabel.Size = UDim2.new(0.65, 0, 0, 10)
@@ -920,14 +919,10 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 			for _, l in ipairs(createdLabels) do
 				if l == stabLabel then found = true break end
 			end
-			if not found then
-				table.insert(createdLabels, stabLabel)
-			end
+			if not found then table.insert(createdLabels, stabLabel) end
 		end
 	else
-		if stabLabel then
-			pcall(function() stabLabel:Destroy() end)
-		end
+		if stabLabel then pcall(function() stabLabel:Destroy() end) end
 	end
 
 	local tierLabel = parent:FindFirstChild("TierLabel")
@@ -936,16 +931,12 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 		local tierColor = Color3.fromRGB(255, 255, 255)
 
 		if tierLabel and tierLabel:IsA("TextLabel") then
-			if tierLabel.Text ~= tierText then
-				tierLabel.Text = tierText
-			end
+			if tierLabel.Text ~= tierText then tierLabel.Text = tierText end
 			tierLabel.TextColor3 = tierColor
 			tierLabel.Position = UDim2.new(0, 4, 0, 28)
 			tierLabel.ZIndex = 150
 		else
-			if tierLabel then
-				pcall(function() tierLabel:Destroy() end)
-			end
+			if tierLabel then pcall(function() tierLabel:Destroy() end) end
 			tierLabel = Instance.new("TextLabel")
 			tierLabel.Name = "TierLabel"
 			tierLabel.Size = UDim2.new(0.65, 0, 0, 10)
@@ -967,14 +958,10 @@ local function addValueLabel(parent, itemName, slot, isOffer)
 			for _, l in ipairs(createdLabels) do
 				if l == tierLabel then found = true break end
 			end
-			if not found then
-				table.insert(createdLabels, tierLabel)
-			end
+			if not found then table.insert(createdLabels, tierLabel) end
 		end
 	else
-		if tierLabel then
-			pcall(function() tierLabel:Destroy() end)
-		end
+		if tierLabel then pcall(function() tierLabel:Destroy() end) end
 	end
 end
 
@@ -1038,6 +1025,119 @@ local function stripBracketSuffix(text)
 	return (text:gsub("%s*%[[%+%-]?[%d%.,]+[KkMm]?%]%s*$", ""))
 end
 
+-- ============================================================
+-- Итоговая стоимость YourOffer / TheirOffer (fixed)
+-- ============================================================
+
+local function getSlotItemName(slot)
+	if not slot then return nil end
+	local container = slot:FindFirstChild("Container") or slot
+	local nameFrame = container:FindFirstChild("ItemName") or slot:FindFirstChild("ItemName")
+	if not nameFrame then
+		nameFrame = container:FindFirstChild("Name") or slot:FindFirstChild("Name")
+	end
+	if nameFrame then
+		local label
+		if nameFrame:IsA("TextLabel") then
+			label = nameFrame
+		else
+			label = nameFrame:FindFirstChild("Label") or nameFrame:FindFirstChildWhichIsA("TextLabel")
+		end
+		if label and label.Text ~= "" and label.Text ~= "Loading..." then
+			return label.Text
+		end
+	end
+	return nil
+end
+
+-- Слот считаем "заполненным" только если у него видимая иконка с реальной картинкой
+local function slotHasItem(slot)
+	if not slot or not slot:IsA("GuiObject") then return false end
+	if slot.Visible == false then return false end
+	local container = slot:FindFirstChild("Container") or slot
+	local icon = container:FindFirstChild("Icon") or container:FindFirstChild("ItemIcon")
+	if icon and icon:IsA("ImageLabel") then
+		if icon.Image and icon.Image ~= "" and icon.Visible ~= false then
+			return true
+		end
+	end
+	return false
+end
+
+local function sumOfferSlots(offer)
+	if not offer then return 0 end
+	local container = offer:FindFirstChild("Container") or offer
+	local total = 0
+	for i = 1, 4 do
+		local slot = container:FindFirstChild("NewItem" .. tostring(i))
+		if slot and slotHasItem(slot) then
+			local name = getSlotItemName(slot)
+			if name then
+				local _, val = lookupDisplayAndNumericValue(name, slot)
+				val = val or 0
+				total = total + val
+				print(("[TradeValues] %s.NewItem%d -> %s = %s"):format(offer.Name, i, name, fmt(val)))
+			end
+		else
+			print(("[TradeValues] %s.NewItem%d -> (пусто)"):format(offer.Name, i))
+		end
+	end
+	return total
+end
+
+local MY_LABELS = { ValueLabel = true, StabilityLabel = true, TierLabel = true, TotalValueLabel = true }
+
+-- Ищем родной заголовок оффера среди прямых детей (не наши метки)
+local function findTitleLabel(offer)
+	if not offer then return nil end
+	for _, child in pairs(offer:GetChildren()) do
+		if child:IsA("TextLabel") and not MY_LABELS[child.Name] then
+			return child
+		end
+	end
+	return nil
+end
+
+local function writeTotal(offer, prefix)
+	if not offer then return end
+	local total = sumOfferSlots(offer)
+	local text = prefix .. fmt(total)
+
+	local target = findTitleLabel(offer)
+
+	if target then
+		if target.Text ~= text then target.Text = text end
+		-- если заголовок прижат влево — сдвигаем правее иконки
+		pcall(function()
+			local pos = target.Position
+			if pos.X.Scale == 0 and pos.X.Offset < 40 then
+				target.Position = UDim2.new(pos.X.Scale, 40, pos.Y.Scale, pos.Y.Offset)
+			end
+		end)
+	else
+		target = offer:FindFirstChild("TotalValueLabel")
+		if not target then
+			target = Instance.new("TextLabel")
+			target.Name = "TotalValueLabel"
+			target.BackgroundTransparency = 1
+			target.AnchorPoint = Vector2.new(0.5, 0)
+			target.Position = UDim2.new(0.5, 0, 0, 4)
+			target.Size = UDim2.new(0.5, 0, 0, 18)
+			target.TextXAlignment = Enum.TextXAlignment.Center
+			target.TextScaled = true
+			target.Font = Enum.Font.SourceSansBold
+			target.TextColor3 = Color3.fromRGB(255, 255, 255)
+			target.TextStrokeTransparency = 0.5
+			target.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+			target.ZIndex = 200
+			target.Parent = offer
+		end
+		if target.Text ~= text then target.Text = text end
+	end
+end
+
+-- ============================================================
+
 local function getTradeGui()
 	local pg = LocalPlayer:FindFirstChild("PlayerGui")
 	if pg then
@@ -1065,27 +1165,12 @@ end
 
 local function updateTitles(trade, tradeGui)
 	if not tradeGui then return end
-	local yourTitle, yourOffer, theirOffer = getTitles(tradeGui)
-	if not yourTitle then return end
+	local yourOffer  = trade and trade:FindFirstChild("YourOffer")
+	local theirOffer = trade and trade:FindFirstChild("TheirOffer")
 
-	if yourTitle ~= titleState.yourTitle then
-		titleState.yourTitle = yourTitle
-		titleState.yourBase = nil
-	end
-
-	local you = sumOffer(yourOffer or (trade and trade:FindFirstChild("YourOffer")))
-	local them = sumOffer(theirOffer or (trade and trade:FindFirstChild("TheirOffer")))
-
-	if yourTitle:IsA("TextLabel") then
-		local base = titleState.yourBase
-		if not base then
-			base = stripBracketSuffix(yourTitle.Text)
-			if base == "" then base = "YOUR OFFER" end
-			titleState.yourBase = base
-		end
-		local newText = base .. formatDiffBracket(them - you)
-		if yourTitle.Text ~= newText then yourTitle.Text = newText end
-	end
+	-- Цены берутся из той же базы, что загружена с GitHub (DatabaseExact/ByName)
+	writeTotal(yourOffer,  "YOU: ")
+	writeTotal(theirOffer, "THEM: ")
 end
 
 local function resetTitlesIfTradeClosed()
@@ -1097,41 +1182,125 @@ local function resetTitlesIfTradeClosed()
 	end
 end
 
--- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
--- Р¦РРљР› РћРџР РћРЎРђ вЂ” С‚РѕР»СЊРєРѕ TradeGUI_Phone.Container.Trade
---   .YourOffer  Рё  .TheirOffer
--- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 task.spawn(function()
 	while alive and task.wait(0.35) do
 		pcall(resetTitlesIfTradeClosed)
 
 		pcall(function()
 			local pg = LocalPlayer:FindFirstChild("PlayerGui")
+			local tradeGUI = pg and pg:FindFirstChild("TradeGUI")
+			if tradeGUI and tradeGUI.Enabled then
+				local container = tradeGUI:FindFirstChild("Container")
+				if container then
+					local trade = container:FindFirstChild("Trade")
+					if trade then
+						local yourOffer = trade:FindFirstChild("YourOffer")
+						if yourOffer then processContainerDescendants(yourOffer, true) end
+						local theirOffer = trade:FindFirstChild("TheirOffer")
+						if theirOffer then processContainerDescendants(theirOffer, true) end
+						updateTitles(trade, tradeGUI)
+					end
+					local items = container:FindFirstChild("Items")
+					if items then processContainerDescendants(items, false) end
+					local items2 = container:FindFirstChild("Items2")
+					if items2 then processContainerDescendants(items2, false) end
+				end
+			end
+		end)
+
+		pcall(function()
+			local pg = LocalPlayer:FindFirstChild("PlayerGui")
 			local tradeGUIPhone = pg and pg:FindFirstChild("TradeGUI_Phone")
-			if not tradeGUIPhone or not tradeGUIPhone.Enabled then return end
+			if tradeGUIPhone and tradeGUIPhone.Enabled then
+				local container = tradeGUIPhone:FindFirstChild("Container")
+				if container then
+					local trade = container:FindFirstChild("Trade")
+					if trade then
+						local yourOffer = trade:FindFirstChild("YourOffer")
+						if yourOffer then processContainerDescendants(yourOffer, true) end
+						local theirOffer = trade:FindFirstChild("TheirOffer")
+						if theirOffer then processContainerDescendants(theirOffer, true) end
+						updateTitles(trade, tradeGUIPhone)
+					end
+					local items = container:FindFirstChild("Items")
+					if items then processContainerDescendants(items, false) end
+					local items2 = container:FindFirstChild("Items2")
+					if items2 then processContainerDescendants(items2, false) end
+				end
 
-			local container = tradeGUIPhone:FindFirstChild("Container")
-			if not container then return end
+				local inactive = tradeGUIPhone:FindFirstChild("Inactive")
+				local frame = inactive and inactive:FindFirstChild("Frame")
+				local main = frame and frame:FindFirstChild("Main")
+				if main then
+					local trade = main:FindFirstChild("Trade")
+					if trade then
+						local yourOffer = trade:FindFirstChild("YourOffer")
+						if yourOffer then processContainerDescendants(yourOffer, true) end
+						local theirOffer = trade:FindFirstChild("TheirOffer")
+						if theirOffer then processContainerDescendants(theirOffer, true) end
+						updateTitles(trade, tradeGUIPhone)
+					end
+					local items = main:FindFirstChild("Items")
+					if items then processContainerDescendants(items, false) end
+					local items2 = main:FindFirstChild("Items2")
+					if items2 then processContainerDescendants(items2, false) end
+				end
+			end
+		end)
 
-			local trade = container:FindFirstChild("Trade")
-			if not trade then return end
+		pcall(function()
+			local pg = LocalPlayer:FindFirstChild("PlayerGui")
+			local rep = ReplicatedStorage:FindFirstChild("ReplicatedStorage") or ReplicatedStorage
+			local repMain = rep:FindFirstChild("MainGUI")
 
-			local yourOffer = trade:FindFirstChild("YourOffer")
-			if yourOffer then
-				processContainerDescendants(yourOffer, true)
+			local targets = {}
+			if pg then
+				local mainGUI = pg:FindFirstChild("MainGUI")
+				local gameFrame = mainGUI and mainGUI:FindFirstChild("Game")
+				if gameFrame then table.insert(targets, gameFrame) end
+				local lobby = mainGUI and mainGUI:FindFirstChild("Lobby")
+				if lobby then processContainerDescendants(lobby, false) end
+			end
+			if repMain then
+				local gameFrame = repMain:FindFirstChild("Game")
+				if gameFrame then table.insert(targets, gameFrame) end
+				local lobby = repMain:FindFirstChild("Lobby")
+				if lobby then processContainerDescendants(lobby, false) end
 			end
 
-			local theirOffer = trade:FindFirstChild("TheirOffer")
-			if theirOffer then
-				processContainerDescendants(theirOffer, true)
+			for _, gameFrame in ipairs(targets) do
+				local inv = gameFrame:FindFirstChild("Inventory")
+				if inv and (inv.Visible or gameFrame.Parent == repMain) then
+					processContainerDescendants(inv, false)
+				end
+				local inv2 = gameFrame:FindFirstChild("Inventory2")
+				if inv2 and (inv2.Visible or gameFrame.Parent == repMain) then
+					processContainerDescendants(inv2, false)
+				end
+				local viewProfile = gameFrame:FindFirstChild("ViewProfile")
+				if viewProfile and (viewProfile.Visible or gameFrame.Parent == repMain) then
+					processContainerDescendants(viewProfile, false)
+				end
+				local crafting = gameFrame:FindFirstChild("Crafting")
+				if crafting and (crafting.Visible or gameFrame.Parent == repMain) then
+					processContainerDescendants(crafting, false)
+				end
+				local leaderboard = gameFrame:FindFirstChild("Leaderboard")
+				local inspect = leaderboard and leaderboard:FindFirstChild("Inspect")
+				if inspect and (inspect.Visible or gameFrame.Parent == repMain) then
+					processContainerDescendants(inspect, false)
+				end
 			end
 
-			updateTitles(trade, tradeGUIPhone)
+			local phoneInv = pg and (pg:FindFirstChild("InventoryPhone") or pg:FindFirstChild("Inventory_Phone"))
+			if phoneInv and phoneInv.Visible then
+				processContainerDescendants(phoneInv, false)
+			end
 		end)
 	end
 end)
 
-print("[TradeValues] LOADED | source=" .. tostring(valueSource) .. " | slim: TradeGUI_Phone only")
+print("[TradeValues] LOADED | source=" .. tostring(valueSource) .. " | count=" .. tostring(loadedCount) .. " | by Namedadude")
 if valueSource == "failed" then
-	warn("[TradeValues] JSON load failed вЂ” check URL / HttpService")
+	warn("[TradeValues] JSON load failed after retries — check internet / executor HTTP / repository URL")
 end
