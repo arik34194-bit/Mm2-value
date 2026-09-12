@@ -38,6 +38,10 @@ local valueCache = {}
 local createdLabels = {}
 local titleState = { yourBase = nil, yourTitle = nil }
 
+-- Цвет как у "20 VALUE": золотисто-оранжевая заливка + тёмно-оливковая обводка
+local VALUE_FILL   = Color3.fromRGB(255, 178, 64)
+local VALUE_STROKE = Color3.fromRGB(86, 62, 12)
+
 local function cleanString(s)
 	if not s then return "" end
 	s = tostring(s):lower()
@@ -1026,7 +1030,7 @@ local function stripBracketSuffix(text)
 end
 
 -- ============================================================
--- Итоговая стоимость YourOffer / TheirOffer (fixed)
+-- Итоговая стоимость YourOffer / TheirOffer (gold fill + dark stroke)
 -- ============================================================
 
 local function getSlotItemName(slot)
@@ -1050,7 +1054,6 @@ local function getSlotItemName(slot)
 	return nil
 end
 
--- Слот считаем "заполненным" только если у него видимая иконка с реальной картинкой
 local function slotHasItem(slot)
 	if not slot or not slot:IsA("GuiObject") then return false end
 	if slot.Visible == false then return false end
@@ -1087,7 +1090,6 @@ end
 
 local MY_LABELS = { ValueLabel = true, StabilityLabel = true, TierLabel = true, TotalValueLabel = true }
 
--- Ищем родной заголовок оффера среди прямых детей (не наши метки)
 local function findTitleLabel(offer)
 	if not offer then return nil end
 	for _, child in pairs(offer:GetChildren()) do
@@ -1096,6 +1098,13 @@ local function findTitleLabel(offer)
 		end
 	end
 	return nil
+end
+
+-- Применяет стиль "20 VALUE": заливка + обводка
+local function applyValueStyle(label)
+	label.TextColor3 = VALUE_FILL
+	label.TextStrokeColor3 = VALUE_STROKE
+	label.TextStrokeTransparency = 0
 end
 
 local function writeTotal(offer, prefix)
@@ -1107,7 +1116,7 @@ local function writeTotal(offer, prefix)
 
 	if target then
 		if target.Text ~= text then target.Text = text end
-		-- если заголовок прижат влево — сдвигаем правее иконки
+		applyValueStyle(target)
 		pcall(function()
 			local pos = target.Position
 			if pos.X.Scale == 0 and pos.X.Offset < 40 then
@@ -1126,13 +1135,13 @@ local function writeTotal(offer, prefix)
 			target.TextXAlignment = Enum.TextXAlignment.Center
 			target.TextScaled = true
 			target.Font = Enum.Font.SourceSansBold
-			target.TextColor3 = Color3.fromRGB(255, 255, 255)
-			target.TextStrokeTransparency = 0.5
-			target.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+			target.TextStrokeTransparency = 0
+			target.TextStrokeColor3 = VALUE_STROKE
 			target.ZIndex = 200
 			target.Parent = offer
 		end
 		if target.Text ~= text then target.Text = text end
+		applyValueStyle(target)
 	end
 end
 
@@ -1168,9 +1177,8 @@ local function updateTitles(trade, tradeGui)
 	local yourOffer  = trade and trade:FindFirstChild("YourOffer")
 	local theirOffer = trade and trade:FindFirstChild("TheirOffer")
 
-	-- Цены берутся из той же базы, что загружена с GitHub (DatabaseExact/ByName)
-	writeTotal(yourOffer,  "YOU: ")
-	writeTotal(theirOffer, "THEM: ")
+	writeTotal(yourOffer,  "Value: ")
+	writeTotal(theirOffer, "Value: ")
 end
 
 local function resetTitlesIfTradeClosed()
