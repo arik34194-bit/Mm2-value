@@ -1746,7 +1746,7 @@
   "godlies": [
     {
       "name": "Traveler's Gun",
-      "value": 5300
+      "value": 5200
     },
     {
       "name": "Evergun",
@@ -1754,27 +1754,23 @@
     },
     {
       "name": "Constellation",
-      "value": 2900
+      "value": 2800
     },
     {
       "name": "Evergreen",
-      "value": 2550
+      "value": 2500
+    },
+    {
+      "name": "Alienbeam",
+      "value": 2000
     },
     {
       "name": "Raygun",
-      "value": 1950
+      "value": 1975
     },
     {
       "name": "Darkshot",
       "value": 1800
-    },
-    {
-      "name": "Alienbeam",
-      "value": 1800
-    },
-    {
-      "name": "Vampire's Gun",
-      "value": 1775
     },
     {
       "name": "Darksword",
@@ -1783,6 +1779,10 @@
     {
       "name": "Turkey",
       "value": 1775
+    },
+    {
+      "name": "Vampire's Gun",
+      "value": 1750
     },
     {
       "name": "Blossom",
@@ -1889,15 +1889,15 @@
       "value": 155
     },
     {
+      "name": "Icecream",
+      "value": 150
+    },
+    {
       "name": "Sweet",
       "value": 150
     },
     {
       "name": "Borealis",
-      "value": 145
-    },
-    {
-      "name": "Icecream",
       "value": 145
     },
     {
@@ -2256,15 +2256,15 @@
   "chromas": [
     {
       "name": "C. Traveler's Gun",
-      "value": 165000
+      "value": 160000
     },
     {
       "name": "Chroma Evergun",
-      "value": 60000
+      "value": 58000
     },
     {
       "name": "Chroma Evergreen",
-      "value": 43000
+      "value": 42000
     },
     {
       "name": "Chroma Bauble",
@@ -2296,11 +2296,11 @@
     },
     {
       "name": "Chroma Sunset",
-      "value": 6750
+      "value": 7000
     },
     {
       "name": "Chroma Blizzard",
-      "value": 5250
+      "value": 5500
     },
     {
       "name": "Chroma Snowstorm",
@@ -2320,7 +2320,7 @@
     },
     {
       "name": "Chroma Icecream",
-      "value": 2000
+      "value": 1900
     },
     {
       "name": "Chroma Ornament",
@@ -2336,11 +2336,11 @@
     },
     {
       "name": "Chroma Sands",
-      "value": 1500
+      "value": 1450
     },
     {
       "name": "Chroma Beachy",
-      "value": 1450
+      "value": 1400
     },
     {
       "name": "Chroma Darkbringer",
@@ -2500,7 +2500,7 @@
     },
     {
       "name": "Celestial",
-      "value": 2550
+      "value": 2450
     },
     {
       "name": "Vampire's Axe",
