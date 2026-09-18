@@ -355,6 +355,10 @@
       "value": 5
     },
     {
+      "name": "Ghost",
+      "value": 0
+    },
+    {
       "name": "Gingerbread (Gun)",
       "value": 0.02
     },
@@ -1069,6 +1073,22 @@
       "value": 1
     },
     {
+      "name": "Cowboy",
+      "value": 0
+    },
+    {
+      "name": "Laser",
+      "value": 0
+    },
+    {
+      "name": "Phaser",
+      "value": 0
+    },
+    {
+      "name": "Prince",
+      "value": 0
+    },
+    {
       "name": "Gingerbread (Gun)",
       "value": 0.6
     },
@@ -1553,6 +1573,14 @@
     {
       "name": "Cavern (Gun)",
       "value": 1
+    },
+    {
+      "name": "Golden",
+      "value": 0
+    },
+    {
+      "name": "Shadow",
+      "value": 0
     },
     {
       "name": "Arctic (Knife)",
