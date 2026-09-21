@@ -319,6 +319,10 @@
       "value": 15
     },
     {
+      "name": "Ghost",
+      "value": 12
+    },
+    {
       "name": "Void",
       "value": 12
     },
@@ -353,10 +357,6 @@
     {
       "name": "Zombie (Gun)",
       "value": 5
-    },
-    {
-      "name": "Ghost",
-      "value": 0
     },
     {
       "name": "Gingerbread (Gun)",
@@ -934,7 +934,7 @@
     },
     {
       "name": "Dungeon",
-      "value": 150
+      "value": 140
     },
     {
       "name": "Darkknife",
@@ -967,6 +967,22 @@
     {
       "name": "Magma (Gun)",
       "value": 13
+    },
+    {
+      "name": "Cowboy",
+      "value": 12
+    },
+    {
+      "name": "Laser",
+      "value": 12
+    },
+    {
+      "name": "Phaser",
+      "value": 12
+    },
+    {
+      "name": "Prince",
+      "value": 12
     },
     {
       "name": "Silent Night (Gun)",
@@ -1071,22 +1087,6 @@
     {
       "name": "Vampire (Knife)",
       "value": 1
-    },
-    {
-      "name": "Cowboy",
-      "value": 0
-    },
-    {
-      "name": "Laser",
-      "value": 0
-    },
-    {
-      "name": "Phaser",
-      "value": 0
-    },
-    {
-      "name": "Prince",
-      "value": 0
     },
     {
       "name": "Gingerbread (Gun)",
@@ -1467,6 +1467,14 @@
       "value": 28
     },
     {
+      "name": "Golden",
+      "value": 12
+    },
+    {
+      "name": "Shadow",
+      "value": 12
+    },
+    {
       "name": "Arctic (Gun)",
       "value": 10
     },
@@ -1573,14 +1581,6 @@
     {
       "name": "Cavern (Gun)",
       "value": 1
-    },
-    {
-      "name": "Golden",
-      "value": 0
-    },
-    {
-      "name": "Shadow",
-      "value": 0
     },
     {
       "name": "Arctic (Knife)",
@@ -1754,7 +1754,7 @@
     },
     {
       "name": "Constellation",
-      "value": 2800
+      "value": 2750
     },
     {
       "name": "Evergreen",
@@ -1762,6 +1762,10 @@
     },
     {
       "name": "Alienbeam",
+      "value": 2050
+    },
+    {
+      "name": "Turkey",
       "value": 2000
     },
     {
@@ -1777,12 +1781,8 @@
       "value": 1775
     },
     {
-      "name": "Turkey",
-      "value": 1775
-    },
-    {
       "name": "Vampire's Gun",
-      "value": 1750
+      "value": 1775
     },
     {
       "name": "Blossom",
@@ -1854,11 +1854,11 @@
     },
     {
       "name": "Blizzard",
-      "value": 310
+      "value": 305
     },
     {
       "name": "Snowstorm",
-      "value": 310
+      "value": 305
     },
     {
       "name": "Ocean",
@@ -1882,15 +1882,15 @@
     },
     {
       "name": "Watergun",
-      "value": 175
+      "value": 170
+    },
+    {
+      "name": "Icecream",
+      "value": 155
     },
     {
       "name": "Treat",
       "value": 155
-    },
-    {
-      "name": "Icecream",
-      "value": 150
     },
     {
       "name": "Sweet",
@@ -1910,11 +1910,11 @@
     },
     {
       "name": "Beachy",
-      "value": 105
+      "value": 100
     },
     {
       "name": "Sands",
-      "value": 105
+      "value": 100
     },
     {
       "name": "Ornament",
@@ -2256,15 +2256,15 @@
   "chromas": [
     {
       "name": "C. Traveler's Gun",
-      "value": 160000
+      "value": 155000
     },
     {
       "name": "Chroma Evergun",
-      "value": 58000
+      "value": 57000
     },
     {
       "name": "Chroma Evergreen",
-      "value": 42000
+      "value": 41000
     },
     {
       "name": "Chroma Bauble",
@@ -2296,7 +2296,7 @@
     },
     {
       "name": "Chroma Sunset",
-      "value": 7000
+      "value": 7250
     },
     {
       "name": "Chroma Blizzard",
@@ -2319,12 +2319,12 @@
       "value": 2350
     },
     {
-      "name": "Chroma Icecream",
-      "value": 1900
-    },
-    {
       "name": "Chroma Ornament",
       "value": 1825
+    },
+    {
+      "name": "Chroma Icecream",
+      "value": 1800
     },
     {
       "name": "Chroma Treat",
@@ -2336,11 +2336,11 @@
     },
     {
       "name": "Chroma Sands",
-      "value": 1450
+      "value": 1350
     },
     {
       "name": "Chroma Beachy",
-      "value": 1400
+      "value": 1300
     },
     {
       "name": "Chroma Darkbringer",
@@ -2492,7 +2492,7 @@
   "ancients": [
     {
       "name": "Gingerscope",
-      "value": 15750
+      "value": 16000
     },
     {
       "name": "Traveler's Axe",
@@ -2500,7 +2500,7 @@
     },
     {
       "name": "Celestial",
-      "value": 2450
+      "value": 2350
     },
     {
       "name": "Vampire's Axe",
