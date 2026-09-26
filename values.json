@@ -308,7 +308,7 @@
     },
     {
       "name": "Mummy (2017)",
-      "value": 20
+      "value": 25
     },
     {
       "name": "Skulls",
@@ -317,10 +317,6 @@
     {
       "name": "Zombified (Gun)",
       "value": 15
-    },
-    {
-      "name": "Ghost",
-      "value": 12
     },
     {
       "name": "Void",
@@ -333,6 +329,10 @@
     {
       "name": "Wrap (Knife)",
       "value": 12
+    },
+    {
+      "name": "Ghost",
+      "value": 10
     },
     {
       "name": "Steel (Gun)",
@@ -934,7 +934,7 @@
     },
     {
       "name": "Dungeon",
-      "value": 140
+      "value": 130
     },
     {
       "name": "Darkknife",
@@ -969,28 +969,28 @@
       "value": 13
     },
     {
-      "name": "Cowboy",
-      "value": 12
-    },
-    {
-      "name": "Laser",
-      "value": 12
-    },
-    {
-      "name": "Phaser",
-      "value": 12
-    },
-    {
-      "name": "Prince",
-      "value": 12
-    },
-    {
       "name": "Silent Night (Gun)",
       "value": 12
     },
     {
       "name": "Snowflakes",
       "value": 12
+    },
+    {
+      "name": "Cowboy",
+      "value": 10
+    },
+    {
+      "name": "Laser",
+      "value": 10
+    },
+    {
+      "name": "Phaser",
+      "value": 10
+    },
+    {
+      "name": "Prince",
+      "value": 10
     },
     {
       "name": "Floral (Knife)",
@@ -1468,11 +1468,11 @@
     },
     {
       "name": "Golden",
-      "value": 12
+      "value": 10
     },
     {
       "name": "Shadow",
-      "value": 12
+      "value": 10
     },
     {
       "name": "Arctic (Gun)",
@@ -1485,6 +1485,10 @@
     {
       "name": "Broken",
       "value": 7
+    },
+    {
+      "name": "Bunnies",
+      "value": 5
     },
     {
       "name": "Icedriller",
@@ -1501,10 +1505,6 @@
     {
       "name": "Ginger (Gun)",
       "value": 5
-    },
-    {
-      "name": "Bunnies",
-      "value": 4
     },
     {
       "name": "Red Scratch",
@@ -1758,11 +1758,11 @@
     },
     {
       "name": "Evergreen",
-      "value": 2500
+      "value": 2525
     },
     {
       "name": "Alienbeam",
-      "value": 2100
+      "value": 2050
     },
     {
       "name": "Turkey",
@@ -1770,11 +1770,11 @@
     },
     {
       "name": "Raygun",
-      "value": 1950
+      "value": 1900
     },
     {
       "name": "Vampire's Gun",
-      "value": 1825
+      "value": 1875
     },
     {
       "name": "Darkshot",
@@ -1870,11 +1870,11 @@
     },
     {
       "name": "Flowerwood Gun",
-      "value": 265
+      "value": 260
     },
     {
       "name": "Flowerwood",
-      "value": 260
+      "value": 255
     },
     {
       "name": "Snow Dagger",
@@ -1882,7 +1882,7 @@
     },
     {
       "name": "Watergun",
-      "value": 165
+      "value": 160
     },
     {
       "name": "Icecream",
@@ -1906,15 +1906,15 @@
     },
     {
       "name": "Bat",
-      "value": 120
+      "value": 125
     },
     {
       "name": "Beachy",
-      "value": 95
+      "value": 90
     },
     {
       "name": "Sands",
-      "value": 95
+      "value": 90
     },
     {
       "name": "Pearlshine",
@@ -1925,11 +1925,11 @@
       "value": 80
     },
     {
-      "name": "Ornament",
-      "value": 80
+      "name": "Pearl",
+      "value": 75
     },
     {
-      "name": "Pearl",
+      "name": "Ornament",
       "value": 75
     },
     {
@@ -2256,11 +2256,11 @@
   "chromas": [
     {
       "name": "C. Traveler's Gun",
-      "value": 150000
+      "value": 145000
     },
     {
       "name": "Chroma Evergun",
-      "value": 57000
+      "value": 56000
     },
     {
       "name": "Chroma Evergreen",
@@ -2268,11 +2268,11 @@
     },
     {
       "name": "Chroma Bauble",
-      "value": 34000
+      "value": 33000
     },
     {
       "name": "C. Constellation",
-      "value": 31000
+      "value": 30000
     },
     {
       "name": "C. Vampire's Gun",
@@ -2291,12 +2291,12 @@
       "value": 10750
     },
     {
-      "name": "Chroma Snowcannon",
+      "name": "Chroma Sunset",
       "value": 7750
     },
     {
-      "name": "Chroma Sunset",
-      "value": 7500
+      "name": "Chroma Snowcannon",
+      "value": 7750
     },
     {
       "name": "Chroma Blizzard",
@@ -2308,11 +2308,11 @@
     },
     {
       "name": "Chroma Heart Wand",
-      "value": 4250
+      "value": 4200
     },
     {
       "name": "Chroma Watergun",
-      "value": 2600
+      "value": 2500
     },
     {
       "name": "Chroma Snow Dagger",
@@ -2327,20 +2327,20 @@
       "value": 1775
     },
     {
-      "name": "Chroma Icecream",
-      "value": 1750
-    },
-    {
       "name": "Chroma Sweet",
       "value": 1725
     },
     {
+      "name": "Chroma Icecream",
+      "value": 1700
+    },
+    {
       "name": "Chroma Sands",
-      "value": 1300
+      "value": 1250
     },
     {
       "name": "Chroma Beachy",
-      "value": 1250
+      "value": 1200
     },
     {
       "name": "Chroma Darkbringer",
@@ -2496,11 +2496,11 @@
     },
     {
       "name": "Traveler's Axe",
-      "value": 8100
+      "value": 8000
     },
     {
       "name": "Celestial",
-      "value": 2300
+      "value": 2250
     },
     {
       "name": "Vampire's Axe",
